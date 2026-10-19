@@ -1,0 +1,10 @@
+{
+  "name": "hydro-deployment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:vercel": "npm --prefix frontend run build && node deployment/prepare-static.mjs",
+    "test:vercel": "node --test deployment/*.test.mjs"
+  },
+  "engines": { "node": ">=22.12.0" }
+}

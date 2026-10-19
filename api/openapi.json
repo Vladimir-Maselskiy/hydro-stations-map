@@ -1,0 +1,193 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Station Map Test API",
+    "version": "1.0.0",
+    "description": "A local API with synthetic station data. Station IDs, coordinates, and measurements are stable across requests, so overlapping map areas return the same stations at the same locations. Each request to an /api endpoint has a 10% default chance of returning HTTP 503."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Local Vite development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Check API availability",
+        "description": "Returns a health status. This endpoint is not affected by simulated API errors.",
+        "responses": {
+          "200": {
+            "description": "The API is available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stations": {
+      "get": {
+        "summary": "List stations with their latest measurements",
+        "description": "Returns one page of stations. Error responses use the shape {error: {code, message}}. Requests have a 10% default chance of returning a simulated HTTP 503 response.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of records per page (1–100).",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Non-negative offset into the result set.",
+            "schema": { "type": "integer", "minimum": 0, "default": 0 }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional substring to match in a station or river name.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Optional map bounds in west,south,east,north order, using longitude and latitude degrees.",
+            "schema": { "type": "string", "example": "27,46,35,51" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "A page of stations.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StationsPage" } } } },
+          "400": { "description": "Invalid limit, cursor, or bbox.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "503": { "description": "Random temporary service unavailability.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/stations/{station_id}/measurements": {
+      "get": {
+        "summary": "List measurements for a station",
+        "description": "Returns synthetic daily measurements for the specified station only, from newest to oldest. Error responses use the shape {error: {code, message}}. Requests have a 10% default chance of returning a simulated HTTP 503 response.",
+        "parameters": [
+          {
+            "name": "station_id",
+            "in": "path",
+            "required": true,
+            "description": "Station identifier.",
+            "schema": { "type": "string", "example": "st-00001" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of records per page (1–100).",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Non-negative offset into the measurement history.",
+            "schema": { "type": "integer", "minimum": 0, "default": 0 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "A page of measurements.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeasurementsPage" } } } },
+          "400": { "description": "Invalid limit or cursor.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Station not found.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "503": { "description": "Random temporary service unavailability.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LatestMeasurement": {
+        "type": "object",
+        "required": ["value", "unit", "measuredAt"],
+        "properties": {
+          "value": { "type": "number", "description": "Measured water level." },
+          "unit": { "type": "string", "example": "м" },
+          "measuredAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Coordinates": {
+        "type": "object",
+        "required": ["latitude", "longitude"],
+        "properties": {
+          "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+          "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+        }
+      },
+      "Station": {
+        "type": "object",
+        "required": ["id", "name", "river", "coordinates", "latestMeasurement"],
+        "properties": {
+          "id": { "type": "string", "example": "st-00001" },
+          "name": { "type": "string" },
+          "river": { "type": "string" },
+          "coordinates": { "$ref": "#/components/schemas/Coordinates" },
+          "latestMeasurement": { "$ref": "#/components/schemas/LatestMeasurement" }
+        }
+      },
+      "Measurement": {
+        "type": "object",
+        "required": ["id", "value", "unit", "measuredAt"],
+        "properties": {
+          "id": { "type": "string", "example": "st-00001-m-001" },
+          "value": { "type": "number" },
+          "unit": { "type": "string", "example": "м" },
+          "measuredAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": ["limit", "totalItems", "nextCursor", "hasMore"],
+        "properties": {
+          "limit": { "type": "integer" },
+          "totalItems": { "type": "integer" },
+          "nextCursor": { "type": "string", "nullable": true },
+          "hasMore": { "type": "boolean" }
+        }
+      },
+      "StationsPage": {
+        "type": "object",
+        "required": ["data", "pagination"],
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Station" } },
+          "pagination": { "$ref": "#/components/schemas/Pagination" }
+        }
+      },
+      "MeasurementsPage": {
+        "type": "object",
+        "required": ["data", "pagination"],
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Measurement" } },
+          "pagination": { "$ref": "#/components/schemas/Pagination" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

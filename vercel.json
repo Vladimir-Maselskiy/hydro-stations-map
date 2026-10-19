@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci --prefix frontend",
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/**/*.js": {
+      "includeFiles": "{api/openapi.json,frontend/node_modules/swagger-ui-dist/**}"
+    }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" }
+  ]
+}

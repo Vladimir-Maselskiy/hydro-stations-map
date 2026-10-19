@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" fill="none">
+  <rect width="1200" height="760" fill="#e8f1eb"/>
+  <path d="M0 167 112 118l84 27 92-45 97 19 59-46 113 28 92-36 96 36 80-24 88 55 104-12 83 56v584H0V167Z" fill="#f3f4e9"/>
+  <path d="m-28 618 119-42 92 16 64-46 80 17 64-31 101 29 77-49 93 18 64-35 108 10 55-47 110 18 80-31 145 23" stroke="#c6d8cb" stroke-width="2"/>
+  <path d="m-24 481 116-35 75 12 77-51 96 20 82-52 91 24 72-48 108 25 69-39 83 15 81-54 111 32 96-27 87 11" stroke="#c6d8cb" stroke-width="2"/>
+  <path d="m-15 346 126-26 73 21 63-48 113 17 85-41 86 29 70-48 91 29 87-38 80 21 91-45 87 33 108-20 77 25" stroke="#c6d8cb" stroke-width="2"/>
+  <path d="M88 641c110-78 92-106 185-143 68-27 104-9 155-68 50-58 40-93 111-120 67-25 120-1 177-46 46-36 45-74 105-98 54-22 104-7 178-54" stroke="#87b7c1" stroke-linecap="round" stroke-width="8"/>
+  <path d="M242 716c59-85 73-127 123-153 51-26 86-7 123-52 42-52 35-87 80-117" stroke="#a4c9ce" stroke-linecap="round" stroke-width="5"/>
+  <path d="M667 540c43-62 89-76 137-73 42 3 77-10 112-48 36-39 53-78 113-102" stroke="#a4c9ce" stroke-linecap="round" stroke-width="5"/>
+  <path d="M510 288c22 44 22 69 4 104-20 40-61 62-83 98" stroke="#a4c9ce" stroke-linecap="round" stroke-width="4"/>
+  <g fill="#6b8d73" font-family="sans-serif" font-size="18" opacity=".72">
+    <text x="123" y="211">Схематична область</text>
+    <text x="891" y="675">Синтетичні координати</text>
+  </g>
+  <g fill="#fff" opacity=".62">
+    <circle cx="292" cy="322" r="5"/><circle cx="840" cy="248" r="5"/><circle cx="1024" cy="475" r="5"/><circle cx="438" cy="576" r="5"/>
+  </g>
+</svg>
