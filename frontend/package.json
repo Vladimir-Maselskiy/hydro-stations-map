@@ -7,7 +7,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test"
+    "test": "node --test",
+    "format": "prettier --write src client.test.js composables.test.js",
+    "format:check": "prettier --check src client.test.js composables.test.js"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -18,6 +20,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.10",
+    "prettier": "^3.9.10",
     "swagger-ui-dist": "5.33.3",
     "vite": "8.3.4"
   }
