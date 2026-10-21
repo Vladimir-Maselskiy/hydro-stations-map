@@ -83,9 +83,11 @@ function resetMap() {
           :loaded-count="stations.length"
           :favorites-only="favoritesOnly"
           :loading="loading"
+          :error="error"
           @select="selectStation"
           @bounds-change="bounds = $event"
           @reset="resetMap"
+          @retry="retry"
         />
       </section>
       <footer class="page-footer">

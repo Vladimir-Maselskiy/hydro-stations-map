@@ -28,7 +28,9 @@ const emit = defineEmits([
     <div class="search-section">
       <div class="section-title">
         <h2>Станції</h2>
-        <span class="count">{{ total.toLocaleString('uk-UA') }}</span>
+        <span class="count">
+          {{ (favoritesOnly ? visible.length : total).toLocaleString('uk-UA') }}
+        </span>
       </div>
       <label class="search-box">
         <span aria-hidden="true">⌕</span>
@@ -69,18 +71,18 @@ const emit = defineEmits([
       <span v-if="loading" class="loading-dot"></span>
     </div>
     <div class="station-list" :aria-busy="loading">
-      <div v-if="error" class="state-card" role="alert">
+      <div v-if="error && !favoritesOnly" class="state-card" role="alert">
         <strong>Дані тимчасово недоступні</strong>
         <p>{{ error }}</p>
         <button class="primary small" @click="emit('retry')">Спробувати ще раз</button>
       </div>
-      <template v-if="loading && !stations.length">
+      <template v-if="loading && !stations.length && !favoritesOnly">
         <div v-for="n in 6" :key="n" class="skeleton-row">
           <i></i>
           <i></i>
         </div>
       </template>
-      <div v-else-if="!visible.length && !error" class="state-card">
+      <div v-else-if="!visible.length && (!error || favoritesOnly)" class="state-card">
         <span class="empty-icon">⌕</span>
         <strong>{{ favoritesOnly ? 'Обраних станцій не знайдено' : 'Станцій не знайдено' }}</strong>
         <p>

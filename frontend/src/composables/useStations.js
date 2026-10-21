@@ -1,4 +1,4 @@
-import { ref, watch, onScopeDispose } from 'vue';
+import { ref, computed, watch, onScopeDispose } from 'vue';
 import { request } from '../api.js';
 
 export function useStations(query, bounds, fetchPage = request) {
@@ -8,11 +8,20 @@ export function useStations(query, bounds, fetchPage = request) {
     loading = ref(false),
     error = ref('');
   const retryAppend = ref(false);
+  const criteria = computed(() => {
+    const search = query.value.trim();
+    return search ? `search=${encodeURIComponent(search)}` : `bbox=${bounds.value}`;
+  });
+  let loadedCriteria = null;
   let stationController,
     timer,
     disposed = false;
   async function loadStations(append = false) {
     if (disposed) return;
+    clearTimeout(timer);
+    // A cursor belongs only to the exact search/bounds that produced it.
+    const requestedCriteria = criteria.value;
+    append = append && loadedCriteria === requestedCriteria && cursor.value !== null;
     stationController?.abort();
     const controller = new AbortController();
     stationController = controller;
@@ -27,6 +36,7 @@ export function useStations(query, bounds, fetchPage = request) {
       const result = await fetchPage(`/api/stations?${params}`, controller.signal);
       if (controller.signal.aborted) return;
       stations.value = append ? [...stations.value, ...result.data] : result.data;
+      loadedCriteria = requestedCriteria;
       total.value = result.pagination.totalItems;
       cursor.value = result.pagination.nextCursor;
     } catch (e) {
@@ -35,13 +45,20 @@ export function useStations(query, bounds, fetchPage = request) {
       if (stationController === controller) loading.value = false;
     }
   }
-  watch([query, bounds], ([search], [previousSearch]) => {
-    // Search spans the entire dataset; map movement must not reset its pagination.
-    if (search.trim() && search === previousSearch) return;
-    stationController?.abort();
-    clearTimeout(timer);
-    timer = setTimeout(() => loadStations(), 350);
-  });
+  watch(
+    criteria,
+    () => {
+      stationController?.abort();
+      stationController = null;
+      clearTimeout(timer);
+      cursor.value = null;
+      retryAppend.value = false;
+      error.value = '';
+      loading.value = true;
+      timer = setTimeout(() => loadStations(), 350);
+    },
+    { flush: 'sync' },
+  );
   onScopeDispose(() => {
     disposed = true;
     stationController?.abort();

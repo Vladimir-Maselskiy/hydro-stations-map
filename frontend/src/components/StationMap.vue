@@ -10,8 +10,9 @@ const props = defineProps({
   loadedCount: { type: Number, required: true },
   favoritesOnly: Boolean,
   loading: Boolean,
+  error: { type: String, default: '' },
 });
-const emit = defineEmits(['select', 'bounds-change', 'reset']);
+const emit = defineEmits(['select', 'bounds-change', 'reset', 'retry']);
 const mapEl = ref(null),
   mapReady = ref(false),
   tileError = ref(false);
@@ -184,10 +185,45 @@ onBeforeUnmount(() => {
     <div v-if="tileError" class="tile-notice" role="status">
       Тло карти недоступне. Перевірте інтернет; станції та пошук працюють.
     </div>
-    <div v-if="loading" class="map-loading" role="status">Оновлюємо станції…</div>
+    <div v-if="error && !favoritesOnly" class="map-error" role="alert">
+      <strong>Не вдалося оновити станції</strong>
+      <p>{{ error }}</p>
+      <button class="primary" @click="emit('retry')">Спробувати ще раз</button>
+    </div>
+    <div v-else-if="loading && !favoritesOnly" class="map-loading" role="status">
+      Оновлюємо станції…
+    </div>
     <div v-else-if="mapReady && !selected" class="map-hint">
       ⌖
       <span>Натисніть на точку, щоб відкрити станцію</span>
     </div>
   </div>
 </template>
+
+<style scoped>
+.map-error {
+  position: absolute;
+  z-index: 3;
+  left: 20px;
+  right: 20px;
+  bottom: 70px;
+  max-width: 360px;
+  padding: 16px;
+  border: 1px solid #e6d9b6;
+  border-radius: 10px;
+  background: #fffdf5;
+  box-shadow: 0 3px 16px #193b3e12;
+  font-size: 12px;
+}
+.map-error p {
+  margin: 8px 0 12px;
+  color: #708385;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .map-error {
+    left: 12px;
+    right: 12px;
+  }
+}
+</style>
